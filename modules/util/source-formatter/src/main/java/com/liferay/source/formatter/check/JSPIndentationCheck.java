@@ -192,14 +192,29 @@ public class JSPIndentationCheck extends BaseFileCheck {
 		matcher = _javaSourcePattern2.matcher(content);
 
 		while (matcher.find()) {
-			String tabs = matcher.group(1);
+			String tabs = matcher.group(3);
 
-			int minimumTabCount = _getMinimumTabCount(matcher.group(2));
+			int minimumTabCount = _getMinimumTabCount(matcher.group(4));
 
 			if ((tabs.length() + 1) != minimumTabCount) {
 				int diff = minimumTabCount - (tabs.length() + 1);
-				int end = getLineNumber(content, matcher.end(2));
-				int start = getLineNumber(content, matcher.start(3));
+				int end = getLineNumber(content, matcher.end(4));
+				int start = getLineNumber(content, matcher.start(5));
+
+				return _fixTabs(content, start, end, diff);
+			}
+
+			if (Validator.isNull(matcher.group(1))) {
+				tabs = matcher.group(3);
+			} else {
+				tabs = matcher.group(2);
+			}
+
+			String closeTabs =  matcher.group(6);
+			if (closeTabs.length() != tabs.length()) {
+				int diff = closeTabs.length() - tabs.length();
+				int end = getLineNumber(content, matcher.end(6));
+				int start = getLineNumber(content, matcher.start(6));
 
 				return _fixTabs(content, start, end, diff);
 			}
@@ -363,7 +378,7 @@ public class JSPIndentationCheck extends BaseFileCheck {
 		List<JSPLine> jspLines = new ArrayList<>();
 
 		try (UnsyncBufferedReader unsyncBufferedReader =
-				new UnsyncBufferedReader(new UnsyncStringReader(content))) {
+				 new UnsyncBufferedReader(new UnsyncStringReader(content))) {
 
 			String line = null;
 
@@ -540,8 +555,7 @@ public class JSPIndentationCheck extends BaseFileCheck {
 	private static final Pattern _javaSourcePattern1 = Pattern.compile(
 		"\n(\t*)(<%\\!?\n(\t*[^\t%].*?))\n(\t*)%>(\n|\\Z)", Pattern.DOTALL);
 	private static final Pattern _javaSourcePattern2 = Pattern.compile(
-		"\n(\t*)([^\t\n]+[\"']<%=\n(\t*[^\t%].*?))\n\t*%>[\"']\n",
-		Pattern.DOTALL);
+		"((\t*)\\w+:)?\n(\t*)([^\t\n]*[\"']<%=\n(\t*[^\t%][\\s\\S]*?))\n(\t*)%>[\"']");
 
 	private class JSPLine {
 
