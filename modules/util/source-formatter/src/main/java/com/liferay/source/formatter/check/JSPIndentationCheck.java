@@ -206,11 +206,13 @@ public class JSPIndentationCheck extends BaseFileCheck {
 
 			if (Validator.isNull(matcher.group(1))) {
 				tabs = matcher.group(3);
-			} else {
+			}
+			else {
 				tabs = matcher.group(2);
 			}
 
-			String closeTabs =  matcher.group(6);
+			String closeTabs = matcher.group(6);
+
 			if (closeTabs.length() != tabs.length()) {
 				int diff = closeTabs.length() - tabs.length();
 				int end = getLineNumber(content, matcher.end(6));
@@ -378,7 +380,7 @@ public class JSPIndentationCheck extends BaseFileCheck {
 		List<JSPLine> jspLines = new ArrayList<>();
 
 		try (UnsyncBufferedReader unsyncBufferedReader =
-				 new UnsyncBufferedReader(new UnsyncStringReader(content))) {
+				new UnsyncBufferedReader(new UnsyncStringReader(content))) {
 
 			String line = null;
 
@@ -555,7 +557,8 @@ public class JSPIndentationCheck extends BaseFileCheck {
 	private static final Pattern _javaSourcePattern1 = Pattern.compile(
 		"\n(\t*)(<%\\!?\n(\t*[^\t%].*?))\n(\t*)%>(\n|\\Z)", Pattern.DOTALL);
 	private static final Pattern _javaSourcePattern2 = Pattern.compile(
-		"((\t*)\\w+:)?\n(\t*)([^\t\n]*[\"']<%=\n(\t*[^\t%][\\s\\S]*?))\n(\t*)%>[\"']");
+		"((\t*)\\w+:)?\n(\t*)([^\t\n]*[\"']<%=\n(\t*[^\t%][\\s\\S]*?))" +
+			"\n(\t*)%>[\"']");
 
 	private class JSPLine {
 
