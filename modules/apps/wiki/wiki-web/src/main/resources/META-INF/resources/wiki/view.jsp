@@ -297,7 +297,7 @@ if (portletTitleBasedNavigation) {
 										).setRedirect(
 											currentURL
 										).buildString()
-%>'
+									%>'
 								/>
 
 								<liferay-ui:icon

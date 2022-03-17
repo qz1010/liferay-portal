@@ -665,7 +665,7 @@ currentURLObj.setParameter("historyKey", liferayPortletResponse.getNamespace() +
 									).setWindowState(
 										LiferayWindowState.POP_UP
 									).buildPortletURL()
-								%>',
+							%>',
 						});
 					});
 

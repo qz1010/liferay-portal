@@ -409,7 +409,7 @@ if (Validator.isNotNull(requestUpdateStructureURL)) {
 					).setWindowState(
 						LiferayWindowState.POP_UP
 					).buildString()
-				%>',
+			%>',
 		});
 	}
 
