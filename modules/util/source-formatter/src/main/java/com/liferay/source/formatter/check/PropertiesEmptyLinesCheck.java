@@ -57,7 +57,6 @@ public class PropertiesEmptyLinesCheck extends BaseFileCheck {
 				lineNumber++;
 
 				if (Validator.isNull(line)) {
-					sb.append(line);
 					sb.append(StringPool.NEW_LINE);
 					previousLine = StringPool.BLANK;
 
