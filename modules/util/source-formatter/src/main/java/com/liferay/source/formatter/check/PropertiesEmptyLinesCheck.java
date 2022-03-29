@@ -63,60 +63,60 @@ public class PropertiesEmptyLinesCheck extends BaseFileCheck {
 					continue;
 				}
 
-				String trimLine = StringUtil.trim(line);
+				String trimmedLine = StringUtil.trim(line);
 
-				if (StringUtil.equals(trimLine, StringPool.BACK_SLASH) ||
-					StringUtil.equals(trimLine, "#\\")) {
+				if (StringUtil.equals(trimmedLine, StringPool.BACK_SLASH) ||
+					StringUtil.equals(trimmedLine, "#\\")) {
 
 					sb.append(line);
 					sb.append(StringPool.NEW_LINE);
-					previousLine = trimLine;
+					previousLine = trimmedLine;
 
 					continue;
 				}
 
-				if (!trimLine.startsWith("#")) {
-					int index = trimLine.indexOf("#");
+				if (!trimmedLine.startsWith("#")) {
+					int index = trimmedLine.indexOf("#");
 
-					if ((index != -1) && (index < (trimLine.length() - 1)) &&
-						(trimLine.charAt(index + 1) == CharPool.SPACE)) {
+					if ((index != -1) && (index < (trimmedLine.length() - 1)) &&
+						(trimmedLine.charAt(index + 1) == CharPool.SPACE)) {
 
-						trimLine = StringUtil.trim(
-							trimLine.substring(0, index));
+						trimmedLine = StringUtil.trim(
+							trimmedLine.substring(0, index));
 					}
 				}
 
-				if (!trimLine.startsWith("#") &&
+				if (!trimmedLine.startsWith("#") &&
 					(StringUtil.equals(previousLine, "##") ||
 					 StringUtil.equals(previousLine, "#"))) {
 
 					sb.append(StringPool.NEW_LINE);
 					sb.append(line);
 					sb.append(StringPool.NEW_LINE);
-					previousLine = trimLine;
+					previousLine = trimmedLine;
 
 					continue;
 				}
 
-				if (trimLine.startsWith("##") &&
+				if (trimmedLine.startsWith("##") &&
 					Validator.isNotNull(previousLine) &&
 					!previousLine.startsWith("##")) {
 
 					sb.append(StringPool.NEW_LINE);
 					sb.append(line);
 					sb.append(StringPool.NEW_LINE);
-					previousLine = trimLine;
+					previousLine = trimmedLine;
 
 					continue;
 				}
 
-				if (trimLine.matches("[^#]+=\\\\") &&
+				if (trimmedLine.matches("[^#]+=\\\\") &&
 					Validator.isNotNull(previousLine)) {
 
 					sb.append(StringPool.NEW_LINE);
 					sb.append(line);
 					sb.append(StringPool.NEW_LINE);
-					previousLine = trimLine;
+					previousLine = trimmedLine;
 
 					continue;
 				}
@@ -130,8 +130,8 @@ public class PropertiesEmptyLinesCheck extends BaseFileCheck {
 					nextLine = StringPool.BLANK;
 				}
 
-				if (!trimLine.startsWith("#") &&
-					!trimLine.endsWith(StringPool.BACK_SLASH) &&
+				if (!trimmedLine.startsWith("#") &&
+					!trimmedLine.endsWith(StringPool.BACK_SLASH) &&
 					previousLine.endsWith(StringPool.BACK_SLASH) &&
 					Validator.isNotNull(nextLine) &&
 					!nextLine.matches("^#(?![ #]).+")) {
@@ -144,8 +144,8 @@ public class PropertiesEmptyLinesCheck extends BaseFileCheck {
 					continue;
 				}
 
-				if (trimLine.startsWith("#") &&
-					trimLine.matches(_MULTI_COMMENTS_REGEX)) {
+				if (trimmedLine.startsWith("#") &&
+					trimmedLine.matches(_MULTI_COMMENTS_REGEX)) {
 
 					if (StringUtil.equals(previousLine, "\\") ||
 						StringUtil.equals(previousLine, "#\\") ||
@@ -153,7 +153,7 @@ public class PropertiesEmptyLinesCheck extends BaseFileCheck {
 
 						sb.append(line);
 						sb.append(StringPool.NEW_LINE);
-						previousLine = trimLine;
+						previousLine = trimmedLine;
 
 						continue;
 					}
@@ -165,17 +165,17 @@ public class PropertiesEmptyLinesCheck extends BaseFileCheck {
 						sb.append(StringPool.NEW_LINE);
 						sb.append(line);
 						sb.append(StringPool.NEW_LINE);
-						previousLine = trimLine;
+						previousLine = trimmedLine;
 
 						continue;
 					}
 				}
 
-				if (trimLine.matches("^#(?![ #]).+") &&
+				if (trimmedLine.matches("^#(?![ #]).+") &&
 					previousLine.matches(_MULTI_COMMENTS_REGEX) &&
 					Validator.isNotNull(nextLine)) {
 
-					String statement = trimLine.replaceAll(
+					String statement = trimmedLine.replaceAll(
 						StringPool.DOUBLE_BACK_SLASH, StringPool.BLANK);
 					String nextStatement = nextLine.replaceAll(
 						StringPool.DOUBLE_BACK_SLASH, StringPool.BLANK);
@@ -196,7 +196,7 @@ public class PropertiesEmptyLinesCheck extends BaseFileCheck {
 							sb.append(StringPool.NEW_LINE);
 							sb.append(line);
 							sb.append(StringPool.NEW_LINE);
-							previousLine = trimLine;
+							previousLine = trimmedLine;
 						}
 					}
 					else {
@@ -219,7 +219,7 @@ public class PropertiesEmptyLinesCheck extends BaseFileCheck {
 							sb.append(StringPool.NEW_LINE);
 							sb.append(line);
 							sb.append(StringPool.NEW_LINE);
-							previousLine = trimLine;
+							previousLine = trimmedLine;
 						}
 					}
 
@@ -228,7 +228,7 @@ public class PropertiesEmptyLinesCheck extends BaseFileCheck {
 
 				sb.append(line);
 				sb.append(StringPool.NEW_LINE);
-				previousLine = trimLine;
+				previousLine = trimmedLine;
 			}
 		}
 
