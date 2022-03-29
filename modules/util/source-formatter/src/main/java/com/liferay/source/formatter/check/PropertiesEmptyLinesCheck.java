@@ -115,7 +115,7 @@ public class PropertiesEmptyLinesCheck extends BaseFileCheck {
 					!trimmedLine.endsWith(StringPool.BACK_SLASH) &&
 					previousLine.endsWith(StringPool.BACK_SLASH) &&
 					Validator.isNotNull(nextLine) &&
-					!nextLine.matches("^#(?![ #]).+")) {
+					!nextLine.matches("#(?![ #]).+")) {
 
 					sb.append(line);
 					sb.append(StringPool.NEW_LINE);
@@ -140,7 +140,7 @@ public class PropertiesEmptyLinesCheck extends BaseFileCheck {
 					}
 
 					if (Validator.isNotNull(previousLine) &&
-						!previousLine.matches("^((# +.+)|#)$") &&
+						!previousLine.matches("((# +.+)|#)") &&
 						nextLine.matches(_MULTI_COMMENTS_REGEX)) {
 
 						sb.append(StringPool.NEW_LINE);
@@ -152,7 +152,7 @@ public class PropertiesEmptyLinesCheck extends BaseFileCheck {
 					}
 				}
 
-				if (trimmedLine.matches("^#(?![ #]).+") &&
+				if (trimmedLine.matches("#(?![ #]).+") &&
 					previousLine.matches(_MULTI_COMMENTS_REGEX) &&
 					Validator.isNotNull(nextLine)) {
 
@@ -220,6 +220,6 @@ public class PropertiesEmptyLinesCheck extends BaseFileCheck {
 		return sb.toString();
 	}
 
-	private static final String _MULTI_COMMENTS_REGEX = "^((# (?! ).+)|#)$";
+	private static final String _MULTI_COMMENTS_REGEX = "((# (?! ).+)|#)";
 
 }
