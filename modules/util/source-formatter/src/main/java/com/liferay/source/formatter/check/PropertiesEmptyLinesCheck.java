@@ -51,7 +51,7 @@ public class PropertiesEmptyLinesCheck extends BaseFileCheck {
 		try (UnsyncBufferedReader unsyncBufferedReader =
 				new UnsyncBufferedReader(new UnsyncStringReader(content))) {
 
-			String line;
+			String line = null;
 
 			while ((line = unsyncBufferedReader.readLine()) != null) {
 				lineNumber++;
