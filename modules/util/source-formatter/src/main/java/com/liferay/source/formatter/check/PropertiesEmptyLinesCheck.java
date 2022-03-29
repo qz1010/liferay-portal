@@ -86,32 +86,13 @@ public class PropertiesEmptyLinesCheck extends BaseFileCheck {
 					}
 				}
 
-				if (!trimmedLine.startsWith("#") &&
-					(StringUtil.equals(previousLine, "##") ||
-					 StringUtil.equals(previousLine, "#"))) {
-
-					sb.append(StringPool.NEW_LINE);
-					sb.append(line);
-					sb.append(StringPool.NEW_LINE);
-					previousLine = trimmedLine;
-
-					continue;
-				}
-
-				if (trimmedLine.startsWith("##") &&
-					Validator.isNotNull(previousLine) &&
-					!previousLine.startsWith("##")) {
-
-					sb.append(StringPool.NEW_LINE);
-					sb.append(line);
-					sb.append(StringPool.NEW_LINE);
-					previousLine = trimmedLine;
-
-					continue;
-				}
-
-				if (trimmedLine.matches("[^#]+=\\\\") &&
-					Validator.isNotNull(previousLine)) {
+				if (Validator.isNotNull(previousLine) &&
+					((!trimmedLine.startsWith("#") &&
+					  (StringUtil.equals(previousLine, "##") ||
+					   StringUtil.equals(previousLine, "#"))) ||
+					 (trimmedLine.startsWith("##") &&
+					  !previousLine.startsWith("##")) ||
+					 trimmedLine.matches("[^#]+=\\\\"))) {
 
 					sb.append(StringPool.NEW_LINE);
 					sb.append(line);
