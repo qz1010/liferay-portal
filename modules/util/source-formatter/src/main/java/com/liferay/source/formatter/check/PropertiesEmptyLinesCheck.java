@@ -125,9 +125,7 @@ public class PropertiesEmptyLinesCheck extends BaseFileCheck {
 					continue;
 				}
 
-				if (trimmedLine.startsWith("#") &&
-					trimmedLine.matches(_SINGLE_POUND_COMMENT_LINE_REGEX)) {
-
+				if (trimmedLine.matches(_SINGLE_POUND_COMMENT_LINE_REGEX)) {
 					if (StringUtil.equals(previousLine, "\\") ||
 						StringUtil.equals(previousLine, "#\\") ||
 						previousLine.matches("[^#]+=\\\\*")) {
