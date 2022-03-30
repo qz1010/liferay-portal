@@ -34,7 +34,7 @@ public class PropertiesEmptyLinesCheck extends BaseFileCheck {
 			String fileName, String absolutePath, String content)
 		throws IOException {
 
-		if (!fileName.endsWith(".properties")) {
+		if (fileName.endsWith("/liferay-plugin-package.properties")) {
 			return content;
 		}
 
