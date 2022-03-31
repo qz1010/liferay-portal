@@ -41,6 +41,32 @@ public class PropertiesEmptyLinesCheck extends BaseFileCheck {
 		return _fixMissingEmptyLines(content);
 	}
 
+	private String _appendResult(
+		StringBundler sb, String line, boolean currentLineFlg,
+		boolean notAddLineFlg) {
+
+		if (notAddLineFlg) {
+			sb.append(line);
+			sb.append(StringPool.NEW_LINE);
+
+			return StringUtil.trim(line);
+		}
+
+		if (currentLineFlg) {
+			sb.append(StringPool.NEW_LINE);
+			sb.append(line);
+			sb.append(StringPool.NEW_LINE);
+
+			return StringUtil.trim(line);
+		}
+
+		sb.append(line);
+		sb.append(StringPool.NEW_LINE);
+		sb.append(StringPool.NEW_LINE);
+
+		return StringPool.BLANK;
+	}
+
 	private String _fixMissingEmptyLines(String content) throws IOException {
 		int lineNumber = 0;
 
@@ -52,25 +78,31 @@ public class PropertiesEmptyLinesCheck extends BaseFileCheck {
 				new UnsyncBufferedReader(new UnsyncStringReader(content))) {
 
 			String line = null;
+			boolean nextLineUnEmptyFlg = false;
 
 			while ((line = unsyncBufferedReader.readLine()) != null) {
 				lineNumber++;
 
 				if (Validator.isNull(line)) {
-					sb.append(StringPool.NEW_LINE);
-					previousLine = StringPool.BLANK;
+					if (nextLineUnEmptyFlg) {
+						nextLineUnEmptyFlg = false;
+					}
+					else {
+						sb.append(StringPool.NEW_LINE);
+						previousLine = StringPool.BLANK;
+					}
 
 					continue;
 				}
+
+				nextLineUnEmptyFlg = false;
 
 				String trimmedLine = StringUtil.trim(line);
 
 				if (StringUtil.equals(trimmedLine, StringPool.BACK_SLASH) ||
 					StringUtil.equals(trimmedLine, "#\\")) {
 
-					sb.append(line);
-					sb.append(StringPool.NEW_LINE);
-					previousLine = trimmedLine;
+					previousLine = _appendResult(sb, line, true, true);
 
 					continue;
 				}
@@ -94,10 +126,9 @@ public class PropertiesEmptyLinesCheck extends BaseFileCheck {
 					  !previousLine.startsWith("##")) ||
 					 trimmedLine.matches("[^#]+=\\\\"))) {
 
-					sb.append(StringPool.NEW_LINE);
-					sb.append(line);
-					sb.append(StringPool.NEW_LINE);
-					previousLine = trimmedLine;
+					previousLine = _appendResult(sb, line, true, false);
+					nextLineUnEmptyFlg = trimmedLine.endsWith(
+						StringPool.BACK_SLASH);
 
 					continue;
 				}
@@ -117,10 +148,7 @@ public class PropertiesEmptyLinesCheck extends BaseFileCheck {
 					Validator.isNotNull(nextLine) &&
 					!nextLine.matches("#(?![ #]).+")) {
 
-					sb.append(line);
-					sb.append(StringPool.NEW_LINE);
-					sb.append(StringPool.NEW_LINE);
-					previousLine = StringPool.BLANK;
+					previousLine = _appendResult(sb, line, false, false);
 
 					continue;
 				}
@@ -130,9 +158,7 @@ public class PropertiesEmptyLinesCheck extends BaseFileCheck {
 						StringUtil.equals(previousLine, "#\\") ||
 						previousLine.matches("[^#]+=\\\\*")) {
 
-						sb.append(line);
-						sb.append(StringPool.NEW_LINE);
-						previousLine = trimmedLine;
+						previousLine = _appendResult(sb, line, true, true);
 
 						continue;
 					}
@@ -141,66 +167,17 @@ public class PropertiesEmptyLinesCheck extends BaseFileCheck {
 						!previousLine.matches("((# +.+)|#)") &&
 						nextLine.matches(_SINGLE_POUND_COMMENT_LINE_REGEX)) {
 
-						sb.append(StringPool.NEW_LINE);
-						sb.append(line);
-						sb.append(StringPool.NEW_LINE);
-						previousLine = trimmedLine;
+						previousLine = _appendResult(sb, line, true, false);
 
 						continue;
 					}
 				}
 
 				if (trimmedLine.matches("#(?![ #]).+") &&
-					previousLine.matches(_SINGLE_POUND_COMMENT_LINE_REGEX) &&
-					Validator.isNotNull(nextLine)) {
+					previousLine.matches(_SINGLE_POUND_COMMENT_LINE_REGEX)) {
 
-					String statement = trimmedLine.replaceAll(
-						StringPool.DOUBLE_BACK_SLASH, StringPool.BLANK);
-					String nextStatement = nextLine.replaceAll(
-						StringPool.DOUBLE_BACK_SLASH, StringPool.BLANK);
-					statement = statement.substring(1);
-
-					if (nextLine.startsWith("#") && (nextLine.length() > 1)) {
-						nextStatement = nextStatement.substring(1);
-					}
-
-					if (nextLine.endsWith("\\")) {
-						if (StringUtil.equals(statement, nextStatement)) {
-							sb.append(line);
-							sb.append(StringPool.NEW_LINE);
-							sb.append(StringPool.NEW_LINE);
-							previousLine = StringPool.BLANK;
-						}
-						else {
-							sb.append(StringPool.NEW_LINE);
-							sb.append(line);
-							sb.append(StringPool.NEW_LINE);
-							previousLine = trimmedLine;
-						}
-					}
-					else {
-						String[] statementArray = statement.split(
-							StringPool.EQUAL);
-						String[] nextStatementArray = nextStatement.split(
-							StringPool.EQUAL);
-
-						if ((statementArray.length == 1) &&
-							(nextStatementArray.length == 2) &&
-							StringUtil.equals(
-								statementArray[0], nextStatementArray[0])) {
-
-							sb.append(line);
-							sb.append(StringPool.NEW_LINE);
-							sb.append(StringPool.NEW_LINE);
-							previousLine = StringPool.BLANK;
-						}
-						else {
-							sb.append(StringPool.NEW_LINE);
-							sb.append(line);
-							sb.append(StringPool.NEW_LINE);
-							previousLine = trimmedLine;
-						}
-					}
+					previousLine = _appendResult(sb, line, true, false);
+					nextLineUnEmptyFlg = true;
 
 					continue;
 				}
