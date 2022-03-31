@@ -35,3 +35,9 @@
 ##
 
     testray.main.component.name=Scheduler
+
+    #
+    # Specify the URL of the plugin's download page.
+    #
+
+    #download-url=

@@ -14,6 +14,7 @@
     #
     test.batch.run.property[relevant]=test
     test.batch.run.property.query[functional-tomcat*-mysql*-jdk8][relevant]=\
+
         (\
             (portal.acceptance == true) AND \
             (testray.main.component.name == "Staging")\
@@ -28,3 +29,7 @@
 ## Testray
 ##
     testray.main.component.name=Scheduler
+    #
+    # Specify the URL of the plugin's download page.
+    #
+    #download-url=
