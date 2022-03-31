@@ -33,3 +33,5 @@
     # Specify the URL of the plugin's download page.
     #
     #download-url=
+
+    #download-url=123
