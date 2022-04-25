@@ -14,9 +14,12 @@
  */
 --%>
 
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
 <%@ taglib uri="http://java.sun.com/portlet_2_0" prefix="portlet" %>
 
 <%@ taglib uri="http://liferay.com/tld/aui" prefix="aui" %><%@
+taglib uri="http://liferay.com/tld/ddm" prefix="liferay-ddm" %><%@
 taglib uri="http://liferay.com/tld/portlet" prefix="liferay-portlet" %><%@
 taglib uri="http://liferay.com/tld/ui" prefix="liferay-ui" %>
 
@@ -48,3 +51,63 @@ taglib uri="http://liferay.com/tld/ui" prefix="liferay-ui" %>
 		</td>
 	</tr>
 </table>
+
+<aui:script>
+	function <portlet:namespace />openParentStructureSelector() {
+			url:
+				'<%=
+					PortletURLBuilder.create(
+						PortletURLFactoryUtil.create(request, DDMPortletKeys.DYNAMIC_DATA_MAPPING, PortletRequest.RENDER_PHASE)
+					).setMVCPath(
+						"/select_structure.jsp"
+					).setParameter(
+						"classNameId", PortalUtil.getClassNameId(DDMStructure.class)
+					).setParameter(
+						"classPK", (structure != null) ? structure.getPrimaryKey() : 0
+					).buildString()
+			%>',
+		});
+	}
+
+<c:if test="<%= !print && !portletTitleBasedNavigation %>">
+	<div class="page-actions top-actions">
+		<liferay-ui:icon
+			icon="document"
+			label="<%= true %>"
+			markupView="lexicon"
+			message="details"
+			method="get"
+			url='<%=
+				PortletURLBuilder.create(
+					PortletURLUtil.clone(viewPageURL, renderResponse)
+				).setMVCRenderCommandName(
+					"/wiki/view_page_details"
+				).setRedirect(
+					currentURL
+				).buildString()
+			%>'
+		/>
+	</div>
+</c:if>
+
+<liferay-ddm:template-renderer
+	className="<%= CPOptionsSearchFacetDisplayContext.class.getName() %>"
+	contextObjects='<%=
+		HashMapBuilder.<String, Object>put(
+			"companyId", companyId
+		).put(
+			"cpOptionsSearchFacetDisplayContext", cpOptionsSearchFacetDisplayContext
+		).put(
+			"fieldName", facet.getFieldName()
+		).put(
+			"name", liferayPortletResponse.getNamespace() + "term_" + facet.getFieldName()
+		).put(
+			"namespace", liferayPortletResponse.getNamespace()
+		).put(
+			"showFrequencies", GetterUtil.getBoolean(portletPreferences.getValue("frequenciesVisible", null), true)
+		).put(
+			"title", HtmlUtil.escape(cpOptionsSearchFacetDisplayContext.getCPOptionName(companyId, facet.getFieldId()))
+		).build()
+	%>'
+>
+</aui:script>
