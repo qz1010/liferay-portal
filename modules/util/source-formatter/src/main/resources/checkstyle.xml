@@ -746,6 +746,12 @@
 			<property name="description" value="Checks for consistent naming on variables of type 'StringBundler'." />
 			<message key="variable.name.incorrect" value="StringBundler {0} ''{1}'' should end with either ''sb'' or ''SB''" />
 		</module>
+		<module name="com.liferay.source.formatter.checkstyle.check.StringBundlerUseCheck">
+			<property name="category" value="Performance" />
+			<property name="description" value="Checks for variable is necessary for StringBundler." />
+			<message key="use.string.concat" value="Use ''StringBundler.concat'' instead of continuously use ''append''. " />
+			<message key="use.string.add" value="Use ''String +'' instead of continuously use ''append''. " />
+		</module>
 		<module name="com.liferay.source.formatter.checkstyle.check.StringCastCheck">
 			<property name="category" value="Performance" />
 			<property name="description" value="Finds cases where a redundant `toString()` is called on variable type `String`." />
