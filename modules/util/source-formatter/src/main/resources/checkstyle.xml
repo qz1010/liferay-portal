@@ -794,7 +794,7 @@
 		<module name="com.liferay.source.formatter.checkstyle.check.TransformUtilCheck">
 			<property name="category" value="Styling" />
 			<property name="description" value="Checks for utilization of class `TransformUtil`." />
-			<message key="transform.util.use" value="Use ''TransformUtil'' when initializing variable ''{0}''" />
+			<message key="transform.util.use" value="Use ''TransformUtil'' simply when initializing variable ''{0}''." />
 		</module>
 		<module name="com.liferay.source.formatter.checkstyle.check.TryWithResourcesCheck">
 			<property name="category" value="Performance" />
