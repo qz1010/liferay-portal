@@ -18,8 +18,8 @@ import com.liferay.debug.SFDebugHelper;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.Validator;
 import com.puppycrawl.tools.checkstyle.api.DetailAST;
-import com.puppycrawl.tools.checkstyle.api.FullIdent;
 import com.puppycrawl.tools.checkstyle.api.TokenTypes;
 
 import java.util.List;
@@ -33,120 +33,211 @@ public class TransformUtilCheck extends BaseCheck {
 
     @Override
     public int[] getDefaultTokens() {
-        return new int[]{TokenTypes.VARIABLE_DEF};
+        return new int[]{TokenTypes.LITERAL_FOR};
     }
 
     @Override
     protected void doVisitToken(DetailAST detailAST) {
 
-        String typeName = getTypeName(detailAST, false);
+//        String typeName = getTypeName(detailAST, false);
+//
+//        if (!StringUtil.equals("List", typeName)) {
+//            return;
+//        }
+//
+//        List<DetailAST> callerDetailASTs = getVariableCallerDetailASTList(detailAST);
+//
+//        if (callerDetailASTs.size() > 1) {
+//            return;
+//        }
+//
+//        DetailAST nextDetailAST = detailAST.getNextSibling();
 
-        if (!StringUtil.equals("List", typeName)) {
-            return;
-        }
+//        while (nextDetailAST != null) {
 
-        String listName = getName(detailAST);
+            if (detailAST.getType() == TokenTypes.LITERAL_FOR) {
 
-        List<DetailAST> callerDetailASTs = getVariableCallerDetailASTList(detailAST);
+//                    SFDebugHelper.printStructure(detailAST);
+                DetailAST foEachClauseDetailAST = detailAST.findFirstToken(TokenTypes.FOR_EACH_CLAUSE);
 
-        if (callerDetailASTs.size() > 1) {
-            return;
-        }
-
-        SFDebugHelper.printStructure(detailAST);
-
-        DetailAST nextDetailAST = detailAST.getNextSibling();
-
-        while (nextDetailAST != null) {
-
-            int tokenType = nextDetailAST.getType();
-
-            if (tokenType == TokenTypes.SEMI) {
-                nextDetailAST = nextDetailAST.getNextSibling();
-            } else if (tokenType == TokenTypes.LITERAL_FOR) {
-                DetailAST foEachClauseDetailAST = nextDetailAST.findFirstToken(TokenTypes.FOR_EACH_CLAUSE);
-
-                DetailAST childDetailAST = foEachClauseDetailAST.getFirstChild();
-
-                String paramName = null;
-
-                while (childDetailAST != null) {
-
-                    int tokenTypeInForParam = childDetailAST.getType();
-                    if (tokenTypeInForParam == TokenTypes.VARIABLE_DEF) {
-                        paramName = getName(childDetailAST);
-                    } else if (tokenTypeInForParam == TokenTypes.EXPR) {
-                        if (!equals(callerDetailASTs.get(0), childDetailAST.getFirstChild())) {
-                            return;
-                        }
-                    }
-
-                    childDetailAST = childDetailAST.getNextSibling();
+                if (foEachClauseDetailAST == null) {
+                    return;
                 }
 
-                DetailAST sListDetailAST = nextDetailAST.findFirstToken(TokenTypes.SLIST);
+//                DetailAST childDetailAST = foEachClauseDetailAST.getFirstChild();
+//
+//                while (childDetailAST != null) {
+//
+//                    int tokenTypeInForParam = childDetailAST.getType();
+//
+//                    if (tokenTypeInForParam == TokenTypes.EXPR) {
+//                        if (!equals(callerDetailASTs.get(0), childDetailAST.getFirstChild())) {
+//                            return;
+//                        }
+//                    }
+//
+//                    childDetailAST = childDetailAST.getNextSibling();
+//                }
 
-                DetailAST childInBodyDetailAST = sListDetailAST.getFirstChild();
+                DetailAST sListDetailAST = detailAST.findFirstToken(TokenTypes.SLIST);
 
-                while (true) {
-
-                    int childTokenTypeInBody = childInBodyDetailAST.getType();
-
-                    if (childTokenTypeInBody == TokenTypes.EXPR) {
-                        DetailAST exprChildDetailAST =
-								childInBodyDetailAST.getFirstChild();
-
-                        if (exprChildDetailAST.getType() == TokenTypes.METHOD_CALL) {
-                            DetailAST dotDetailAST = exprChildDetailAST.findFirstToken(
-                                    TokenTypes.DOT);
-
-                            if (dotDetailAST == null) {
-                                break;
-                            }
-
-                            DetailAST dotChildDetailAST = dotDetailAST.getFirstChild();
-
-                            if (dotChildDetailAST.getType() != TokenTypes.IDENT) {
-								break;
-                            }
-
-							String variableName = dotChildDetailAST.getFirstChild().getText();
-							String methodName = dotChildDetailAST.getLastChild().getText();
-
-							if (!StringUtil.equals(methodName, "add")) {
-								return;
-							}
-
-                            DetailAST elistDetailAST = exprChildDetailAST.findFirstToken(TokenTypes.ELIST);
-
-                            if (elistDetailAST.getChildCount() > 1) {
-                                return;
-                            }
-
-                        }
-                    }
-
-					childInBodyDetailAST = childInBodyDetailAST.getNextSibling();
-                }
-
+                _checkForBody(sListDetailAST);
             }
 
-        }
-
-
+//            nextDetailAST = nextDetailAST.getNextSibling();
+//        }
     }
 
-    private static final String _MSG_UNNEEDED_ARRAY = "array.unneeded";
+    private void _checkForBody(DetailAST detailAST) {
 
-    private static final String _MSG_USE_LIST_UTIL_FROM_ARRAY =
-            "list.util.from.array.use";
+        DetailAST childDetailAST = detailAST.getFirstChild();
 
-    private static final String _MSG_USE_LIST_UTIL_IS_EMPTY =
-            "list.util.is.empty.use";
+        int count = 0;
+        while (childDetailAST != null) {
 
-    private static final Log _log = LogFactoryUtil.getLog(ListUtilCheck.class);
+            if (childDetailAST.getType() != TokenTypes.SEMI &&
+                    childDetailAST.getType() != TokenTypes.RCURLY) {
+                count++;
+            }
 
-    private final Map<String, String> _buildGradleContentsMap =
-            new ConcurrentHashMap<>();
+            childDetailAST = childDetailAST.getNextSibling();
+        }
 
+        if (count == 0 || count > 2) {
+            return;
+        }
+
+        DetailAST lastChildDetailAST = detailAST.getLastChild();
+
+        while (true) {
+
+            if (lastChildDetailAST == null) {
+                return;
+            }
+
+            if (lastChildDetailAST.getType() == TokenTypes.SEMI ||
+                    lastChildDetailAST.getType() == TokenTypes.RCURLY) {
+                lastChildDetailAST = lastChildDetailAST.getPreviousSibling();
+            } else {
+                break;
+            }
+        }
+
+        int tokenType = lastChildDetailAST.getType();
+
+        if (tokenType != TokenTypes.EXPR) {
+            return;
+        }
+
+        DetailAST exprChildDetailAST = lastChildDetailAST.getFirstChild();
+
+        if (exprChildDetailAST.getType() != TokenTypes.METHOD_CALL) {
+            return;
+        }
+
+        DetailAST dotDetailAST = exprChildDetailAST.findFirstToken(
+                TokenTypes.DOT);
+
+        if (dotDetailAST == null) {
+            return;
+        }
+
+        DetailAST dotChildDetailAST = dotDetailAST.getFirstChild();
+
+        if (dotChildDetailAST.getType() != TokenTypes.IDENT) {
+            return;
+        }
+
+        String variableName = dotDetailAST.getFirstChild().getText();
+        String methodName = dotDetailAST.getLastChild().getText();
+
+        if (!StringUtil.equals(methodName, "add")) {
+            return;
+        }
+
+        DetailAST elistDetailAST = exprChildDetailAST.findFirstToken(TokenTypes.ELIST);
+
+        if (elistDetailAST.getChildCount() > 1) {
+            return;
+        }
+
+        DetailAST firstChildDetailAST = detailAST.getFirstChild();
+
+        if (!equals(firstChildDetailAST, lastChildDetailAST)) {
+            if (firstChildDetailAST.getType() != TokenTypes.VARIABLE_DEF) {
+                return;
+            }
+
+            String variableNameInBody = getName(firstChildDetailAST);
+
+            if (!_containsVariableName(lastChildDetailAST, variableNameInBody)) {
+                return;
+            }
+        }
+
+        _checkIsUsed(detailAST, variableName);
+    }
+
+    private void _checkIsUsed(DetailAST detailAST, String variableName) {
+
+        if (Validator.isNull(variableName)) {
+            return;
+        }
+
+        DetailAST parentDetailAST = detailAST.getParent();
+
+        DetailAST preDetailAST = parentDetailAST.getPreviousSibling();
+
+        while (preDetailAST != null) {
+
+            int tokenType = preDetailAST.getType();
+
+            if (tokenType == TokenTypes.VARIABLE_DEF) {
+                if (StringUtil.equals(getName(preDetailAST), variableName) &&
+                        StringUtil.equals(getTypeName(preDetailAST, false), "List")) {
+
+                    log(preDetailAST.getLineNo(), _MSG_USE_TRANSFORM_UTIL, variableName);
+
+                    return;
+                }
+            } else {
+                List<DetailAST> identDetailASTList = getAllChildTokens(
+                        preDetailAST, true, TokenTypes.IDENT);
+
+                for (DetailAST identDetailAST : identDetailASTList) {
+                    if (!isMethodNameDetailAST(identDetailAST) &&
+                            variableName.equals(identDetailAST.getText())) {
+
+                        return;
+                    }
+                }
+            }
+
+            preDetailAST = preDetailAST.getPreviousSibling();
+        }
+    }
+
+    private boolean _containsVariableName(
+            DetailAST detailAST, String variableName) {
+
+        if (variableName == null) {
+            return false;
+        }
+
+        List<DetailAST> identDetailASTList = getAllChildTokens(
+                detailAST, true, TokenTypes.IDENT);
+
+        for (DetailAST identDetailAST : identDetailASTList) {
+            if (!isMethodNameDetailAST(identDetailAST) &&
+                    variableName.equals(identDetailAST.getText())) {
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static final String _MSG_USE_TRANSFORM_UTIL =
+            "transform.util.use";
 }
