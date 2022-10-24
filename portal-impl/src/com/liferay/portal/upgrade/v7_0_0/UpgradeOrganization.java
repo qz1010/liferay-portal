@@ -23,6 +23,8 @@ import com.liferay.portal.kernel.model.GroupConstants;
 import com.liferay.portal.kernel.model.Organization;
 import com.liferay.portal.kernel.model.OrganizationConstants;
 import com.liferay.portal.kernel.upgrade.UpgradeProcess;
+import com.liferay.portal.kernel.upgrade.UpgradeProcessFactory;
+import com.liferay.portal.kernel.upgrade.UpgradeStep;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.LoggingTimer;
 import com.liferay.portal.kernel.util.PortalUtil;
@@ -45,10 +47,16 @@ public class UpgradeOrganization extends UpgradeProcess {
 
 	@Override
 	protected void doUpgrade() throws Exception {
-		alterColumnType("Organization_", "statusId", "LONG");
-
 		upgradeOrganizationLogoId();
 		upgradeOrganizationSiteHierarchy();
+	}
+
+	@Override
+	protected UpgradeStep[] getPreUpgradeSteps() {
+		return new UpgradeStep[] {
+			UpgradeProcessFactory.alterColumnType(
+				"Organization_", "statusId", "LONG")
+		};
 	}
 
 	protected void upgradeOrganizationLogoId() throws SQLException {

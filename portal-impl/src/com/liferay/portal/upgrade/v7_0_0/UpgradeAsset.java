@@ -21,6 +21,8 @@ import com.liferay.portal.kernel.dao.db.DBType;
 import com.liferay.portal.kernel.dao.db.DBTypeToSQLMap;
 import com.liferay.portal.kernel.dao.jdbc.AutoBatchPreparedStatementUtil;
 import com.liferay.portal.kernel.upgrade.UpgradeProcess;
+import com.liferay.portal.kernel.upgrade.UpgradeProcessFactory;
+import com.liferay.portal.kernel.upgrade.UpgradeStep;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LoggingTimer;
@@ -67,9 +69,6 @@ public class UpgradeAsset extends UpgradeProcess {
 
 	@Override
 	protected void doUpgrade() throws Exception {
-		alterColumnType("AssetEntry", "description", "TEXT null");
-		alterColumnType("AssetEntry", "summary", "TEXT null");
-
 		deleteOrphanedAssetEntries();
 		updateAssetEntries();
 		updateAssetVocabularies();
@@ -90,6 +89,16 @@ public class UpgradeAsset extends UpgradeProcess {
 				return 0;
 			}
 		}
+	}
+
+	@Override
+	protected UpgradeStep[] getPreUpgradeSteps() {
+		return new UpgradeStep[] {
+			UpgradeProcessFactory.alterColumnType(
+				"AssetEntry", "description", "TEXT null"),
+			UpgradeProcessFactory.alterColumnType(
+				"AssetEntry", "summary", "TEXT null")
+		};
 	}
 
 	protected void updateAssetEntries() throws Exception {
