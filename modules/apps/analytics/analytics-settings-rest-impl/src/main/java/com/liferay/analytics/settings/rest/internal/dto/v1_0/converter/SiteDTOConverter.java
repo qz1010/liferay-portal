@@ -41,9 +41,6 @@ public class SiteDTOConverter implements DTOConverter<Group, Site> {
 	public Site toDTO(DTOConverterContext dtoConverterContext, Group group)
 		throws Exception {
 
-		SiteDTOConverterContext siteDTOConverterContext =
-			(SiteDTOConverterContext)dtoConverterContext;
-
 		return new Site() {
 			{
 				friendlyURL = group.getFriendlyURL();
@@ -58,6 +55,9 @@ public class SiteDTOConverter implements DTOConverter<Group, Site> {
 						String analyticsChannelId =
 							typeSettingsUnicodeProperties.getProperty(
 								"analyticsChannelId", null);
+
+						SiteDTOConverterContext siteDTOConverterContext =
+							(SiteDTOConverterContext)dtoConverterContext;
 
 						return siteDTOConverterContext.getChannelName(
 							GetterUtil.getLong(analyticsChannelId));
