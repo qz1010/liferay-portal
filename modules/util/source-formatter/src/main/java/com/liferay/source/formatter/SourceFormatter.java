@@ -330,10 +330,7 @@ public class SourceFormatter {
 			"org.apache.xerces.jaxp.SAXParserFactoryImpl");
 
 		_init();
-
-		if (_sourceFormatterArgs.isValidateCommitMessages()) {
-			_validateCommitMessages();
-		}
+		_validateCommitMessages();
 
 		if (!_sourceFormatterArgs.isJavaParserEnabled()) {
 			System.out.println(

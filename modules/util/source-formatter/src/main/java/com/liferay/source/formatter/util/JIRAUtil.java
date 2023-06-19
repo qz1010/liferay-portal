@@ -79,6 +79,8 @@ public class JIRAUtil {
 
 		Set<String> validatedTicketIds = new HashSet<>();
 
+		commitMessages.add("LPS-123");
+
 		for (String commitMessage : commitMessages) {
 			if (validatedTicketIds.size() == maxNumberOfTickets) {
 				return;
@@ -127,7 +129,7 @@ public class JIRAUtil {
 		throws IOException {
 
 		URL url = new URL(
-			"https://issues.liferay.com/rest/api/2/issue/" + jiraTicketId);
+			"https://issues.liferay.com/rest/api/2/issue/COMMERCE-11736");
 
 		HttpURLConnection httpURLConnection =
 			(HttpURLConnection)url.openConnection();
@@ -135,7 +137,22 @@ public class JIRAUtil {
 		httpURLConnection.setConnectTimeout(10000);
 		httpURLConnection.setReadTimeout(10000);
 
-		return httpURLConnection.getResponseCode();
+		System.out.println("https://issues.liferay.com/rest/api/2/issue/COMMERCE-11736" + "==================" + httpURLConnection.getResponseCode());
+		System.out.println("====================================================");
+
+
+		URL url1 = new URL(
+			"https://liferay.atlassian.net/rest/api/3/issue/COMMERCE-11736");
+
+		HttpURLConnection httpURLConnection1 =
+			(HttpURLConnection)url1.openConnection();
+
+		httpURLConnection1.setConnectTimeout(10000);
+		httpURLConnection1.setReadTimeout(10000);
+
+		System.out.println("https://liferay.atlassian.net/rest/api/3/issue/COMMERCE-11736" + "==================" + httpURLConnection1.getResponseCode());
+
+		return 404;
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(JIRAUtil.class);
