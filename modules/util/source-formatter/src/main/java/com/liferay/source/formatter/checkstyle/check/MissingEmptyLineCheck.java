@@ -7,6 +7,7 @@ package com.liferay.source.formatter.checkstyle.check;
 
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 
 import com.puppycrawl.tools.checkstyle.api.DetailAST;
@@ -24,7 +25,7 @@ public class MissingEmptyLineCheck extends BaseCheck {
 	public int[] getDefaultTokens() {
 		return new int[] {
 			TokenTypes.ASSIGN, TokenTypes.INSTANCE_INIT, TokenTypes.METHOD_CALL,
-			TokenTypes.VARIABLE_DEF
+			TokenTypes.VARIABLE_DEF, TokenTypes.CLASS_DEF
 		};
 	}
 
@@ -38,6 +39,12 @@ public class MissingEmptyLineCheck extends BaseCheck {
 
 		if (detailAST.getType() == TokenTypes.METHOD_CALL) {
 			_checkMissingEmptyLinesAroundMethodCall(detailAST);
+
+			return;
+		}
+
+		if (detailAST.getType() == TokenTypes.CLASS_DEF) {
+			_checkMissingEmptyLineAfterReferencingVariable(detailAST);
 
 			return;
 		}
@@ -72,8 +79,6 @@ public class MissingEmptyLineCheck extends BaseCheck {
 
 		DetailAST parentDetailAST = detailAST.getParent();
 
-		_checkMissingEmptyLineAfterReferencingVariable(
-			parentDetailAST, variableName, getEndLineNumber(detailAST));
 		_checkMissingEmptyLineBetweenAssigningAndUsingVariable(
 			parentDetailAST, variableName, getEndLineNumber(detailAST));
 	}
@@ -130,22 +135,107 @@ public class MissingEmptyLineCheck extends BaseCheck {
 	}
 
 	private void _checkMissingEmptyLineAfterReferencingVariable(
-		DetailAST detailAST, String variableName, int endLineNumber) {
+		DetailAST detailAST) {
 
-		String lastAssignedVariableName = null;
-		DetailAST previousDetailAST = null;
-		boolean referenced = false;
+		List<DetailAST> childDetailASTs = getAllChildTokens(
+			detailAST, true, TokenTypes.ASSIGN, TokenTypes.METHOD_CALL);
+
+		for (DetailAST childDetailAST : childDetailASTs) {
+			String variableName = null;
+			boolean methodCaller = false;
+
+			if (childDetailAST.getType() == TokenTypes.ASSIGN) {
+				DetailAST firstChildDetailAST = childDetailAST.getFirstChild();
+
+				if ((firstChildDetailAST == null) ||
+					(firstChildDetailAST.getType() == TokenTypes.DOT)) {
+
+					continue;
+				}
+
+				variableName = _getVariableName(childDetailAST);
+
+				if (variableName == null) {
+					continue;
+				}
+			}
+			else {
+				DetailAST methodCallerVariableDetailAST =
+					_getMethodCallerVariableDetailAST(childDetailAST);
+
+				if (methodCallerVariableDetailAST == null) {
+					continue;
+				}
+
+				variableName = methodCallerVariableDetailAST.getText();
+				methodCaller = true;
+			}
+
+			_checkMissingEmptyLineAfterReferencingVariable(
+				childDetailAST.getParent(), variableName,
+				getEndLineNumber(childDetailAST), methodCaller);
+		}
+	}
+
+	private void _checkMissingEmptyLineAfterReferencingVariable(
+		DetailAST detailAST, String variableName, int endLineNumber,
+		boolean methodCaller) {
+
+		DetailAST defDetailAST = getParentWithTokenType(
+			detailAST, TokenTypes.CTOR_DEF, TokenTypes.METHOD_DEF);
+
+		if (defDetailAST == null) {
+			return;
+		}
 
 		DetailAST nextSiblingDetailAST = detailAST.getNextSibling();
 
-		while (true) {
-			if ((nextSiblingDetailAST == null) ||
-				(nextSiblingDetailAST.getType() != TokenTypes.SEMI)) {
+		if ((nextSiblingDetailAST == null) ||
+			(nextSiblingDetailAST.getType() != TokenTypes.SEMI)) {
 
-				return;
+			return;
+		}
+
+		nextSiblingDetailAST = nextSiblingDetailAST.getNextSibling();
+
+		if (nextSiblingDetailAST == null) {
+			return;
+		}
+
+		if (nextSiblingDetailAST.getType() == TokenTypes.RCURLY) {
+			DetailAST parentDetailAST = nextSiblingDetailAST.getParent();
+
+			while (true) {
+				nextSiblingDetailAST = parentDetailAST.getNextSibling();
+
+				if ((parentDetailAST.getType() == TokenTypes.SLIST) &&
+					(nextSiblingDetailAST != null)) {
+
+					return;
+				}
+
+				if ((nextSiblingDetailAST != null) &&
+					(nextSiblingDetailAST.getType() != TokenTypes.RCURLY)) {
+
+					break;
+				}
+
+				parentDetailAST = parentDetailAST.getParent();
+
+				if (equals(defDetailAST, parentDetailAST)) {
+					break;
+				}
 			}
+		}
 
-			nextSiblingDetailAST = nextSiblingDetailAST.getNextSibling();
+		DetailAST previousDetailAST = null;
+		String lastAssignedVariableName = null;
+		boolean referenced = false;
+
+		while (nextSiblingDetailAST != null) {
+			if (nextSiblingDetailAST.getType() == TokenTypes.SEMI) {
+				nextSiblingDetailAST = nextSiblingDetailAST.getNextSibling();
+			}
 
 			if ((nextSiblingDetailAST == null) ||
 				hasPrecedingPlaceholder(nextSiblingDetailAST) ||
@@ -167,10 +257,12 @@ public class MissingEmptyLineCheck extends BaseCheck {
 					return;
 				}
 
-				if (!_containsVariableName(
+				if ((!_containsVariableName(
 						previousDetailAST, lastAssignedVariableName) ||
-					!_containsVariableName(
-						nextSiblingDetailAST, lastAssignedVariableName)) {
+					 !_containsVariableName(
+						 nextSiblingDetailAST, lastAssignedVariableName)) &&
+					!(_checkVariableType(previousDetailAST) &&
+					  _checkVariableType(previousDetailAST))) {
 
 					log(
 						nextExpressionStartLineNumber,
@@ -179,6 +271,27 @@ public class MissingEmptyLineCheck extends BaseCheck {
 				}
 
 				return;
+			}
+
+			if (methodCaller &&
+				(nextSiblingDetailAST.getType() == TokenTypes.EXPR)) {
+
+				DetailAST childDetailAST = nextSiblingDetailAST.getFirstChild();
+
+				if (childDetailAST.getType() != TokenTypes.METHOD_CALL) {
+					return;
+				}
+
+				DetailAST methodCallerVariableDetailAST =
+					_getMethodCallerVariableDetailAST(childDetailAST);
+
+				if ((methodCallerVariableDetailAST == null) ||
+					StringUtil.equals(
+						variableName,
+						methodCallerVariableDetailAST.getText())) {
+
+					return;
+				}
 			}
 
 			List<DetailAST> assignDetailASTList = getAllChildTokens(
@@ -563,6 +676,30 @@ public class MissingEmptyLineCheck extends BaseCheck {
 			previousSiblingDetailAST.getPreviousSibling());
 	}
 
+	private boolean _checkVariableType(DetailAST detailAST) {
+		if (detailAST.getType() != TokenTypes.EXPR) {
+			return false;
+		}
+
+		DetailAST firstChildDetailAST = detailAST.getFirstChild();
+
+		if (firstChildDetailAST.getType() != TokenTypes.METHOD_CALL) {
+			return false;
+		}
+
+		DetailAST methodCallerVariableDetailAST =
+			_getMethodCallerVariableDetailAST(firstChildDetailAST);
+
+		if (methodCallerVariableDetailAST == null) {
+			return false;
+		}
+
+		String variableTypeName = getVariableTypeName(
+			detailAST, methodCallerVariableDetailAST.getText(), false);
+
+		return variableTypeName.equals("StringBundler");
+	}
+
 	private boolean _containsVariableName(
 		DetailAST detailAST, String variableName) {
 
@@ -685,6 +822,22 @@ public class MissingEmptyLineCheck extends BaseCheck {
 		}
 
 		return identDetailASTList;
+	}
+
+	private DetailAST _getMethodCallerVariableDetailAST(DetailAST detailAST) {
+		DetailAST firstChildDetailAST = detailAST.getFirstChild();
+
+		if (firstChildDetailAST.getType() != TokenTypes.DOT) {
+			return null;
+		}
+
+		firstChildDetailAST = firstChildDetailAST.getFirstChild();
+
+		if (firstChildDetailAST.getType() != TokenTypes.IDENT) {
+			return null;
+		}
+
+		return firstChildDetailAST;
 	}
 
 	private String _getVariableName(DetailAST assignDetailAST) {
