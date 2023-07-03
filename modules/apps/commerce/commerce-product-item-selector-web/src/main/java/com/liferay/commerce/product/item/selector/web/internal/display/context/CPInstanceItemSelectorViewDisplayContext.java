@@ -90,6 +90,7 @@ public class CPInstanceItemSelectorViewDisplayContext
 		}
 
 		searchContainer.setResultsAndTotal(cpInstanceBaseModelSearchResult);
+
 		searchContainer.setRowChecker(
 			new CPInstanceItemSelectorChecker(
 				cpRequestHelper.getRenderResponse(),

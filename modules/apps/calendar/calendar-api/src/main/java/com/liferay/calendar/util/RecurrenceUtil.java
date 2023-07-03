@@ -274,6 +274,7 @@ public class RecurrenceUtil {
 		}
 
 		recurrence.setPositionalWeekdays(newPositionalWeekdays);
+
 		recurrence.setTimeZone(timeZone);
 
 		Calendar untilJCalendar = recurrence.getUntilJCalendar();

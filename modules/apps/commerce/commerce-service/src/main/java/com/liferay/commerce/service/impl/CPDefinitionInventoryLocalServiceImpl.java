@@ -64,6 +64,7 @@ public class CPDefinitionInventoryLocalServiceImpl
 		}
 
 		cpDefinitionInventory.setGroupId(cpDefinition.getGroupId());
+
 		cpDefinitionInventory.setCompanyId(user.getCompanyId());
 		cpDefinitionInventory.setUserId(user.getUserId());
 		cpDefinitionInventory.setUserName(user.getFullName());

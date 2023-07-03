@@ -127,6 +127,7 @@ public class CPSpecificationOptionDisplayContext
 				searchContainer.getStart(), searchContainer.getEnd(),
 				CPOptionsPortletUtil.getCPSpecificationOptionSort(
 					getOrderByCol(), getOrderByType())));
+
 		searchContainer.setRowChecker(getRowChecker());
 
 		return searchContainer;

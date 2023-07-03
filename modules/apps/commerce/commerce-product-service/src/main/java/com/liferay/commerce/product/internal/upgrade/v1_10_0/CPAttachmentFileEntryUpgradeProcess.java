@@ -96,6 +96,7 @@ public class CPAttachmentFileEntryUpgradeProcess extends UpgradeProcess {
 				}
 
 				preparedStatement.setString(1, outputJSONArray.toString());
+
 				preparedStatement.setLong(
 					2, resultSet1.getLong("CPAttachmentFileEntryId"));
 

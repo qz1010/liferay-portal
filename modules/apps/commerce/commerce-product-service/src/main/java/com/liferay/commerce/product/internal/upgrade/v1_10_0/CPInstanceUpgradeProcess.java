@@ -93,6 +93,7 @@ public class CPInstanceUpgradeProcess extends UpgradeProcess {
 				}
 
 				preparedStatement.setString(1, outputJSONArray.toString());
+
 				preparedStatement.setLong(
 					2, resultSet1.getLong("CPInstanceId"));
 

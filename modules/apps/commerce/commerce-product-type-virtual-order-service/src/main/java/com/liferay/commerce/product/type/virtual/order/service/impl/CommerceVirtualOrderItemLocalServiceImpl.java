@@ -325,6 +325,7 @@ public class CommerceVirtualOrderItemLocalServiceImpl
 		_validate(fileEntryId, url);
 
 		commerceVirtualOrderItem.setFileEntryId(fileEntryId);
+
 		commerceVirtualOrderItem.setUrl(url);
 		commerceVirtualOrderItem.setActivationStatus(activationStatus);
 
@@ -336,6 +337,7 @@ public class CommerceVirtualOrderItemLocalServiceImpl
 		}
 
 		commerceVirtualOrderItem.setDuration(duration);
+
 		commerceVirtualOrderItem.setUsages(usages);
 		commerceVirtualOrderItem.setMaxUsages(maxUsages);
 		commerceVirtualOrderItem.setActive(active);

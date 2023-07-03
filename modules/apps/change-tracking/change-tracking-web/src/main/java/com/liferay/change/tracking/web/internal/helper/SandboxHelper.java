@@ -100,6 +100,7 @@ public class SandboxHelper {
 		}
 
 		ctPreferences.setCtCollectionId(ctCollection.getCtCollectionId());
+
 		ctPreferences.setPreviousCtCollectionId(
 			CTConstants.CT_COLLECTION_ID_PRODUCTION);
 

@@ -113,6 +113,7 @@ public class SimpleSiteItemSelectorViewDisplayContext
 
 		searchContainer.setOrderByComparator(
 			new GroupNameComparator(orderByAsc));
+
 		searchContainer.setOrderByType(getOrderByType());
 		searchContainer.setResultsAndTotal(
 			() -> _groupService.search(

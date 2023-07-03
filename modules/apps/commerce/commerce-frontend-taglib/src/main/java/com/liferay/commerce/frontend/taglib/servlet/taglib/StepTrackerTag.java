@@ -70,6 +70,7 @@ public class StepTrackerTag extends IncludeTag {
 
 		httpServletRequest.setAttribute(
 			"liferay-commerce:step-tracker:spritemap", _spritemap);
+
 		httpServletRequest.setAttribute(
 			"liferay-commerce:step-tracker:steps", _steps);
 	}

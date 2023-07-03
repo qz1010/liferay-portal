@@ -75,6 +75,7 @@ public class CommerceNotificationEntryFDSActionProvider
 				portletURL.setParameter(Constants.CMD, Constants.DELETE);
 
 				dropdownItem.setHref(portletURL.toString());
+
 				dropdownItem.setLabel(
 					_language.get(httpServletRequest, "delete"));
 			}
