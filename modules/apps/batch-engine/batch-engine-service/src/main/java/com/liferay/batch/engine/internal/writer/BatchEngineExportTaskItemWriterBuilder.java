@@ -74,6 +74,7 @@ public class BatchEngineExportTaskItemWriterBuilder {
 			_parameters.computeIfAbsent("updateStrategy", key -> "UPDATE");
 
 			batchEngineUnitConfiguration.setParameters(_parameters);
+
 			batchEngineUnitConfiguration.setUserId(_userId);
 			batchEngineUnitConfiguration.setVersion("v1.0");
 

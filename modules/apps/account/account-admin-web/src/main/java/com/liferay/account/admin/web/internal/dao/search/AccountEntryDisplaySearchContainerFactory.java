@@ -166,6 +166,7 @@ public class AccountEntryDisplaySearchContainerFactory {
 				accountEntry -> AccountEntryDisplayFactoryUtil.create(
 					accountEntry, liferayPortletRequest)),
 			baseModelSearchResult.getLength());
+
 		accountEntryDisplaySearchContainer.setRowChecker(
 			new EmptyOnClickRowChecker(liferayPortletResponse));
 

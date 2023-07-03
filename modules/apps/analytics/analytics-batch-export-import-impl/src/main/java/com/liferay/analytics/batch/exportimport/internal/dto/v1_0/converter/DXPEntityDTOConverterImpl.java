@@ -417,6 +417,7 @@ public class DXPEntityDTOConverterImpl implements DXPEntityDTOConverter {
 		}
 
 		dxpEntity.setFields(fields);
+
 		dxpEntity.setId(id);
 		dxpEntity.setModifiedDate(modifiedDate);
 		dxpEntity.setType(type);

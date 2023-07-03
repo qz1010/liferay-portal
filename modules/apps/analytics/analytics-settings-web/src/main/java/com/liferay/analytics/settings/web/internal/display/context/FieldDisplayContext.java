@@ -121,6 +121,7 @@ public class FieldDisplayContext {
 				() -> fields,
 				_contactFieldNames.size() -
 					REQUIRED_CONTACT_FIELD_NAMES.length);
+
 			fieldSearch.setRowChecker(
 				new FieldChecker(
 					_mvcRenderCommandName, _renderResponse,
@@ -187,6 +188,7 @@ public class FieldDisplayContext {
 				() -> fields,
 				_userFieldNames.size() + userCustomFieldNames.size() -
 					REQUIRED_USER_FIELD_NAMES.length);
+
 			fieldSearch.setRowChecker(
 				new FieldChecker(
 					_mvcRenderCommandName, _renderResponse,

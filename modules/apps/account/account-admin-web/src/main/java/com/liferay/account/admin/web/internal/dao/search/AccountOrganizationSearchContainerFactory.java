@@ -67,6 +67,7 @@ public class AccountOrganizationSearchContainerFactory {
 		}
 
 		searchContainer.setOrderByCol(orderByCol);
+
 		searchContainer.setOrderByType(
 			SearchOrderByUtil.getOrderByType(
 				liferayPortletRequest, AccountPortletKeys.ACCOUNT_ENTRIES_ADMIN,

@@ -858,6 +858,7 @@ public class BookmarksEntryLocalServiceImpl
 		}
 
 		subscriptionSender.setNotificationType(notificationType);
+
 		subscriptionSender.setPortletId(BookmarksPortletKeys.BOOKMARKS);
 		subscriptionSender.setReplyToAddress(fromAddress);
 		subscriptionSender.setScopeGroupId(entry.getGroupId());

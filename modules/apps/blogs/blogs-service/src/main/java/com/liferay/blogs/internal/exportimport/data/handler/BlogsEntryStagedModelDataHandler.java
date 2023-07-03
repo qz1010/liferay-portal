@@ -311,6 +311,7 @@ public class BlogsEntryStagedModelDataHandler
 			}
 
 			importedEntry.setSmallImageFileEntryId(smallImageFileEntryId);
+
 			importedEntry.setSmallImageURL(entry.getSmallImageURL());
 
 			if ((smallImageFileEntryId == 0) &&

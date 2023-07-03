@@ -108,6 +108,7 @@ public class AssetTagsSummaryTag<R> extends IncludeTag {
 
 		httpServletRequest.setAttribute(
 			"liferay-asset:asset-categories-summary:assetTags", assetTags);
+
 		httpServletRequest.setAttribute(
 			"liferay-asset:asset-tags-summary:assetTagNames", _assetTagNames);
 		httpServletRequest.setAttribute(

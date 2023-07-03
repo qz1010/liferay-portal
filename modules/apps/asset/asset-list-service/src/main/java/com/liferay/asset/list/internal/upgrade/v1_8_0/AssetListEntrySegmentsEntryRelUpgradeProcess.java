@@ -43,6 +43,7 @@ public class AssetListEntrySegmentsEntryRelUpgradeProcess
 				}
 
 				preparedStatement2.setLong(1, priority);
+
 				preparedStatement2.setLong(
 					2, resultSet.getLong("alEntrySegmentsEntryRelId"));
 

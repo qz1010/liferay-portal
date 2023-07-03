@@ -304,6 +304,7 @@ public class AssetTagsDisplayContext {
 			}
 
 			tagsSearchContainer.setOrderByComparator(orderByComparator);
+
 			tagsSearchContainer.setOrderByType(orderByType);
 
 			long scopeGroupId = _themeDisplay.getScopeGroupId();
