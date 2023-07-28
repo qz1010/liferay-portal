@@ -6,9 +6,13 @@
 package com.liferay.source.formatter.check;
 
 import com.liferay.petra.string.StringBundler;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.tools.ToolsUtil;
+import com.liferay.source.formatter.SourceFormatterArgs;
 import com.liferay.source.formatter.processor.JSPSourceProcessor;
+import com.liferay.source.formatter.processor.SourceProcessor;
 
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -36,6 +40,8 @@ public class IfStatementCheck extends BaseFileCheck {
 			if (ifStatement1 == null) {
 				continue;
 			}
+
+			_simplyMultiLineExitIfStatement(fileName, content, ifStatement1);
 
 			String followingCode = ifStatement1.getFollowingCode();
 
@@ -170,27 +176,106 @@ public class IfStatementCheck extends BaseFileCheck {
 		}
 
 		return new IfStatement(
-			StringUtil.trim(content.substring(x + 3, y)),
+			content.substring(x + 3, y),
 			content.substring(content.indexOf("(", pos), x + 1),
 			StringUtil.trim(content.substring(y + 1)), pos, y + 1);
 	}
 
+	private void _simplyMultiLineExitIfStatement(
+		String fileName, String content, IfStatement ifStatement) {
+
+		String clause = ifStatement.getClause();
+
+		if (clause.contains("||") || clause.contains("&&")) {
+
+			return;
+		}
+
+		Matcher matcher = _exitStatementPattern.matcher(
+			ifStatement.getUnTrimBody());
+
+		if (!matcher.find() ||
+			(StringUtil.count(ifStatement.getBody(), StringPool.NEW_LINE) ==
+			 0)) {
+
+			return;
+		}
+
+		String indent = matcher.group(1);
+
+		String followingCode = ifStatement.getFollowingCode();
+
+		matcher = _exitStatementPattern.matcher(followingCode);
+
+		if (matcher.find()) {
+			int x = -1;
+
+			while (true) {
+				x = followingCode.indexOf(";", x + 1);
+
+				if (x == -1) {
+					return;
+				}
+
+				int level = getLevel(
+					followingCode.substring(0, x), new String[] {"(", "{"},
+					new String[] {")", "}"});
+
+				if (ToolsUtil.isInsideQuotes(followingCode, x) ||
+					(level != 0)) {
+
+					continue;
+				}
+
+				SourceProcessor sourceProcessor = getSourceProcessor();
+
+				SourceFormatterArgs sourceFormatterArgs =
+					sourceProcessor.getSourceFormatterArgs();
+
+				int maxLength =
+					sourceFormatterArgs.getMaxLineLength() -
+					(indent.length() * 4);
+
+				String exitStatement = followingCode.substring(0, x + 1);
+
+				if ((StringUtil.count(exitStatement, StringPool.NEW_LINE) ==
+					 0) &&
+					(exitStatement.length() < maxLength)) {
+
+					addMessage(
+						fileName,
+						StringBundler.concat(
+							"Exchange if body and next exit statement on '",
+							getLineNumber(content, ifStatement.getStart()),
+							"' to '",
+							getLineNumber(content, ifStatement.getEnd()) + 2));
+
+					return;
+				}
+			}
+		}
+	}
+
 	private static final Pattern _assignStatementPattern = Pattern.compile(
 		"^(\\w+) =[^;]+;$");
+	private static final Pattern _exitStatementPattern = Pattern.compile(
+		"^\n*(\t*)(break|continue|return|throw)[\\s;]");
 	private static final Pattern _ifStatementPattern = Pattern.compile(
 		"[\n\t]if \\(");
 
-	private class IfStatement {
+	private static class IfStatement {
 
 		public IfStatement(
 			String body, String clause, String followingCode, int start,
 			int end) {
 
-			_body = body;
+			_body = StringUtil.trim(body);
 			_clause = clause;
 			_followingCode = followingCode;
 			_start = start;
 			_end = end;
+
+			_unTrimBody = body;
 		}
 
 		public String getBody() {
@@ -213,11 +298,16 @@ public class IfStatementCheck extends BaseFileCheck {
 			return _start;
 		}
 
+		public String getUnTrimBody() {
+			return _unTrimBody;
+		}
+
 		private final String _body;
 		private final String _clause;
 		private final int _end;
 		private final String _followingCode;
 		private final int _start;
+		private final String _unTrimBody;
 
 	}
 
