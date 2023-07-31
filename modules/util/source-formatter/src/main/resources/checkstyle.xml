@@ -243,6 +243,11 @@
 			<message key="variable.move.after.branching.statement" value="For better performance, the variable assignment for ''{0}'' should come after the ''{1}'' statement on line ''{2}''" />
 			<message key="variable.move.inside.if.statement" value="For better performance, the variable assignment for ''{0}'' should be moved inside the {1}-statement on line ''{2}''" />
 		</module>
+		<module name="com.liferay.source.formatter.checkstyle.check.BooleanReturnCheck">
+			<property name="category" value="Styling" />
+			<property name="description" value="When method return type is boolean, simply logic." />
+			<message key="return.logic.simply" value="'if' statement can be simplified" />
+		</module>
 		<module name="com.liferay.source.formatter.checkstyle.check.CamelCaseNameCheck">
 			<property name="category" value="Naming Conventions" />
 			<property name="description" value="Checks variable names for correct use of `CamelCase`." />
