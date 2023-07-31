@@ -42,6 +42,91 @@ public class AssignAsUsedCheck extends BaseAsUsedCheck {
 		}
 	}
 
+	private void _checkMoveInsideLambdaStatement(
+			DetailAST assignDetailAST, DetailAST nameDetailAST, String variableName,
+			DetailAST firstDependentIdentDetailAST,
+			DetailAST variableDefinitionDetailAST, int actionLineNumber) {
+
+		DetailAST lambdaStatementDetailAST = _getLambdaStatementDetailAST(
+				firstDependentIdentDetailAST, getEndLineNumber(assignDetailAST));
+
+		if (lambdaStatementDetailAST == null) {
+			return;
+		}
+
+		DetailAST parentDetailAST = getParentWithTokenType(
+				lambdaStatementDetailAST, TokenTypes.METHOD_CALL);
+
+		if (parentDetailAST == null ||
+				(parentDetailAST.getLineNo() < assignDetailAST.getLineNo())) {
+			return;
+		}
+
+		parentDetailAST = getParentWithTokenType(
+				parentDetailAST, TokenTypes.LAMBDA,
+				TokenTypes.LITERAL_DO, TokenTypes.LITERAL_FOR,
+				TokenTypes.LITERAL_SYNCHRONIZED,
+				TokenTypes.LITERAL_TRY, TokenTypes.LITERAL_WHILE);
+
+		if ((parentDetailAST != null) &&
+				(parentDetailAST.getLineNo() >= assignDetailAST.getLineNo())) {
+
+			return;
+		}
+
+		DetailAST slistDetailAST = lambdaStatementDetailAST.findFirstToken(
+				TokenTypes.SLIST);
+
+		List<DetailAST> dependentIdentDetailASTs =
+				getDependentIdentDetailASTList(variableDefinitionDetailAST,
+						variableDefinitionDetailAST.getLineNo(),
+						true);
+
+		if (getEndLineNumber(slistDetailAST) <=
+				dependentIdentDetailASTs.get(
+						dependentIdentDetailASTs.size() - 1).getLineNo()) {
+
+			return;
+		}
+
+		if (actionLineNumber != -1) {
+			if (actionLineNumber < lambdaStatementDetailAST.getLineNo()) {
+				return;
+			}
+		}
+
+		log(nameDetailAST, _MSG_MOVE_VARIABLE_INSIDE_IF_STATEMENT,
+				variableName, "lambda", lambdaStatementDetailAST.getLineNo());
+
+	}
+
+	private DetailAST _getLambdaStatementDetailAST(
+			DetailAST detailAST, int lineNumber) {
+
+		DetailAST lambdaStatementDetailAST = null;
+
+		DetailAST slistDetailAST = getParentWithTokenType(
+				detailAST, TokenTypes.SLIST);
+
+		while (true) {
+			if ((slistDetailAST == null) ||
+					(slistDetailAST.getLineNo() < lineNumber)) {
+
+				return lambdaStatementDetailAST;
+			}
+
+			DetailAST parentDetailAST = slistDetailAST.getParent();
+
+			if ((parentDetailAST.getType() == TokenTypes.LAMBDA)) {
+
+				lambdaStatementDetailAST = parentDetailAST;
+			}
+
+			slistDetailAST = getParentWithTokenType(
+					slistDetailAST, TokenTypes.SLIST);
+		}
+	}
+
 	private void _checkAssign(
 		DetailAST detailAST, DetailAST assignDetailAST, int endRange) {
 
@@ -110,6 +195,7 @@ public class AssignAsUsedCheck extends BaseAsUsedCheck {
 						dependentIdentDetailASTList.get(
 							dependentIdentDetailASTList.size() - 1),
 						actionLineNumber);
+					_checkMoveInsideLambdaStatement(assignDetailAST, nameDetailAST, variableName,dependentIdentDetailAST , parentDetailAST, actionLineNumber);
 				}
 			}
 
@@ -130,5 +216,8 @@ public class AssignAsUsedCheck extends BaseAsUsedCheck {
 			return;
 		}
 	}
+
+	private static final String _MSG_MOVE_VARIABLE_INSIDE_IF_STATEMENT =
+			"variable.move.inside.if.statement";
 
 }
