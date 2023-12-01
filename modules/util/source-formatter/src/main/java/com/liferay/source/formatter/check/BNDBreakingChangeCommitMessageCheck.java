@@ -34,6 +34,8 @@ public class BNDBreakingChangeCommitMessageCheck extends BaseFileCheck {
 			return content;
 		}
 
+		System.out.println("test");
+
 		SourceProcessor sourceProcessor = getSourceProcessor();
 
 		SourceFormatterArgs sourceFormatterArgs =
