@@ -75,7 +75,8 @@ renderResponse.setTitle(LanguageUtil.get(request, "specifications"));
 									"cpSpecificationOptionId", cpSpecificationOption.getCPSpecificationOptionId()
 								).setParameter(
 									"toolbarItem", "specification-labels"
-								).buildPortletURL();
+								).setParameter("toolbarItem", "specification-labels").buildPortletURL();
+
 								%>
 
 								<liferay-ui:search-container-column-text
