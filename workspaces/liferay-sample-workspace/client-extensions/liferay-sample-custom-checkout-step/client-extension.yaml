@@ -1,0 +1,26 @@
+assemble:
+    - fromTask: bootJar
+    - from: build/resources/main/assets
+      into: static
+liferay-sample-custom-checkout-step:
+    actionURL: /liferay-sample-custom-checkout-step
+    active: true
+    checkoutStepLabel: liferay-sample-checkout-step-label-pon
+    checkoutStepName: liferay-sample-checkout-step-name-pon
+    checkoutStepOrder: 25
+    name: Liferay Sample Custom Checkout Step
+    oAuth2ApplicationExternalReferenceCode: liferay-sample-custom-checkout-step-oauth-application-user-agent
+    order: true
+    readyURL: /ready
+    renderURL: index.js
+    sennaDisabled: true
+    showControls: true
+    type: customCheckoutStep
+    visible: true
+liferay-sample-custom-checkout-step-oauth-application-user-agent:
+    .serviceAddress: localhost:58081
+    .serviceScheme: http
+    name: Liferay Sample Custom Checkout Step OAuth Application User Agent
+    scopes:
+        - Liferay.Headless.Admin.Workflow.everything
+    type: oAuthApplicationUserAgent
